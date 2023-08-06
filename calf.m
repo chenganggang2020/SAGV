@@ -1,13 +1,13 @@
 function f=calf(chro)
+% f=CALF(chro)是计算染色体簇的每一个染色体的适应度函数值
+%适应度函数返回值是1*M维向量，M是chro的染色体数量
 M=size(chro,3);
 f=zeros(1,M);
 a1=0.5;a2=0.3;a3=0.2;
 for t=1:M
     f1=0.0000;f2=0.0000;f3=0.0000;angle=0.0000;
-%     disp(["大小",size(chro,1)]);
     for i =1:size(chro,1)-1
-        tem=sqrt(double((chro(i,1,t)-chro(i+1,1,t)))^2+(double(chro(i,2,t)-chro(i+1,2,t)))^2);
-%         disp(["结果",num2str(tem)]);
+        tem=sqrt(double((chro(i,1,t)-chro(i+1,1,t)))^2+(double(chro(i,2,t)-chro(i+1,2,t)))^2);              
         f1=f1+tem;
     end
     for i =1:size(chro,2)-2
@@ -23,7 +23,6 @@ for t=1:M
             f3=f3+1;
         end
     end
-    f(1,t)=a1*f1+a2*f2*pi/180+a3*f3;
+    f(1,t)=a1*f1+a2*f2+a3*f3;
 end
-% disp("ok")
 end

@@ -1,5 +1,7 @@
-function covermat = calcover(P1,P2)
-global Size;
+function covermat = calcover(P1,P2,map)
+%covermat = CALCOVER(P1,P2,map)是一个计算路径所能影响的区域的函数
+%返回值covermat是和map大小一致的矩阵,P1,P2是需要计算的路径的两个端点，map是地图数据
+Size=size(map,1);
 esp=0.0000001;
 covermat=zeros(Size,Size);
 cover.length = [];
@@ -63,7 +65,6 @@ if (P1_x ~= P2_x)
         SP(indexn(s),:) = [];
     end
     for t = 1 : size(SP,1)-1
-%         disp([num2str(SP(t,2)),' ',num2str(ceil(SP(t,2)))]);
         cover(t).length = sqrt((SP(t+1,1) - SP(t,1)).^2 + (SP(t+1,2) - SP(t,2)).^2);
         cover(t).index_x = max(ceil(SP(t+1,1)-esp),ceil(SP(t,1)-esp));
         cover(t).index_y = max(ceil(SP(t+1,2)-esp),ceil(SP(t,2)-esp));
@@ -74,15 +75,4 @@ if size(cover,2)~=0
         covermat(cover(i).index_y,cover(i).index_x)=1;
     end
 end
-% imshow(~covermat,[],'InitialMagnification','fit'),axis normal;
-% axis on xy equal;
-% axis([0.5 Size+0.5 0.5 Size+0.5]) ;
-% grid minor;
-% for i = 1 : Size
-%     for j = 1 : Size
-%         text(i,j,num2str((j-1)*Size+i),'FontSize',6);
-%     end
-% end
-% line([P1(1),P2(1)],[P1(2),P2(2)],'color','r');
-% disp("ok")
 end

@@ -19,6 +19,6 @@ for i = 1 : 15
         text(numposx(i,j),numposy(i,j),num2str(gridindex(i,j)));
     end
 end
-P2 = [7,13];
-P1 = [4,1];
+P2 = [5,1];
+P1 = [5,3];
 covermat = calcover(P1,P2);
