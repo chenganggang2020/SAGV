@@ -1,10 +1,8 @@
 name: Fetch generated Zotero PDF attachments
 
 on:
-  push:
+  pull_request:
     branches: [master]
-    paths:
-      - .github/workflows/fetch_adobe_generated_pdfs_20260802.yml
 
 permissions:
   contents: read
