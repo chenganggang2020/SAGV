@@ -1,0 +1,64 @@
+name: Fetch verified LSND publisher PDF
+
+on:
+  pull_request:
+    branches: [master]
+
+permissions:
+  contents: read
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Install PDF validators
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq poppler-utils
+      - name: Download and validate genuine PDF
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p out candidates
+          final='out/Li 等 - 2022 - Stripe Noise Detection of High-Resolution Remote Sensing Images Using Deep Learning Method.pdf'
+          valid_pdf() {
+            local f="$1"
+            test -s "$f" || return 1
+            test "$(head -c 5 "$f")" = '%PDF-' || return 1
+            test "$(stat -c '%s' "$f")" -gt 500000 || return 1
+            pdfinfo "$f" >/tmp/info.txt 2>/dev/null || return 1
+            pdftotext "$f" /tmp/text.txt 2>/dev/null || return 1
+            grep -qi 'Stripe Noise Detection of High-Resolution Remote Sensing Images' /tmp/text.txt || return 1
+            grep -qi '10.3390/rs14040873' /tmp/text.txt || return 1
+            grep -qi 'Binbo Li' /tmp/text.txt || return 1
+            test "$(wc -c </tmp/text.txt)" -gt 50000 || return 1
+            test "$(pdfinfo "$f" | awk '/^Pages:/ {print $2}')" -ge 28 || return 1
+          }
+          urls=(
+            'https://mdpi-res.com/d_attachment/remotesensing/remotesensing-14-00873/article_deploy/remotesensing-14-00873-v2.pdf'
+            'https://mdpi-res.com/d_attachment/remotesensing/remotesensing-14-00873/article_deploy/remotesensing-14-00873.pdf'
+            'https://www.mdpi.com/2072-4292/14/4/873/pdf'
+            'https://www.researchgate.net/publication/journal/Remote-Sensing-2072-4292/publication/358589481_Stripe_Noise_Detection_of_High-Resolution_Remote_Sensing_Images_Using_Deep_Learning_Method/links/657ca7878e2401526dd85219/Stripe-Noise-Detection-of-High-Resolution-Remote-Sensing-Images-Using-Deep-Learning-Method.pdf'
+          )
+          selected=''
+          i=0
+          for u in "${urls[@]}"; do
+            i=$((i+1)); f="candidates/$i.pdf"
+            if curl -fL --retry 3 --retry-all-errors --connect-timeout 30 --max-time 180 -A 'Mozilla/5.0' "$u" -o "$f" && valid_pdf "$f"; then
+              selected="$f"; printf '%s\n' "$u" > out/SOURCE_URL.txt; break
+            fi
+          done
+          test -n "$selected"
+          cp "$selected" "$final"
+          pdfinfo "$final" > out/PDFINFO.txt
+          pdftotext "$final" out/PDF_TEXT_CHECK.txt
+          sha256sum "$final" > out/PDF_SHA256.txt
+      - name: Upload verified PDF
+        uses: actions/upload-artifact@v4
+        with:
+          name: verified-lsnd-publisher-pdf
+          path: out/
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 30
