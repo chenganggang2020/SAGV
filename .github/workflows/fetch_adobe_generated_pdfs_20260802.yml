@@ -1,0 +1,46 @@
+name: Fetch generated Zotero PDF attachments
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - .github/workflows/fetch_adobe_generated_pdfs_20260802.yml
+
+permissions:
+  contents: read
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Install validators
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq poppler-utils
+      - name: Download generated PDFs
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p out
+          curl -fL --retry 4 --retry-all-errors --connect-timeout 30 --max-time 180 \
+            'https://at.adobe.com/YEGPHLEw5Y99SJ2vR4UqSfYa6KKQ' \
+            -o 'out/附件_Li2022_中英对照翻译_技术辅助译解.pdf'
+          curl -fL --retry 4 --retry-all-errors --connect-timeout 30 --max-time 180 \
+            'https://at.adobe.com/Yxyvt5lFwRZs73X04PVuhfPPnuz7' \
+            -o 'out/附件_Li2022_精读分析与ColorCast实施建议.pdf'
+          for f in out/*.pdf; do
+            test "$(head -c 5 "$f")" = '%PDF-'
+            pdfinfo "$f"
+            pdftotext "$f" "${f%.pdf}.txt"
+            test "$(wc -c < "${f%.pdf}.txt")" -gt 1000
+            sha256sum "$f"
+          done
+      - name: Upload PDF attachments
+        uses: actions/upload-artifact@v4
+        with:
+          name: zotero-pdf-attachments-20260802
+          path: out/*.pdf
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 7
