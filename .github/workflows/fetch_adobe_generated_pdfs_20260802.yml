@@ -22,22 +22,26 @@ jobs:
           set -euo pipefail
           mkdir -p out
           curl -fL --retry 4 --retry-all-errors --connect-timeout 30 --max-time 180 \
-            'https://at.adobe.com/CifSJmTfSQ126UeOV5KD75OTQzeK' \
+            'https://at.adobe.com/FzMR1U26G6GuFq9Vi7lXSu3YTTr1' \
             -o 'out/附件_Li2022_中英对照翻译_技术辅助译解.pdf'
           curl -fL --retry 4 --retry-all-errors --connect-timeout 30 --max-time 180 \
-            'https://at.adobe.com/yRjtzeKWdgKyxyCsAxnLplFiQeay' \
+            'https://at.adobe.com/Vo5FVVXaic89Dp4DxoohbzbGFc9j' \
             -o 'out/附件_Li2022_精读分析与ColorCast实施建议.pdf'
           for f in out/*.pdf; do
             test "$(head -c 5 "$f")" = '%PDF-'
             pdfinfo "$f"
             pdftotext "$f" "${f%.pdf}.txt"
             test "$(wc -c < "${f%.pdf}.txt")" -gt 1000
+            grep -q 'Donghai' "${f%.pdf}.txt"
+            grep -q 'Lijuan' "${f%.pdf}.txt"
+            grep -q 'Jiabao' "${f%.pdf}.txt"
+            grep -q 'Shaowei' "${f%.pdf}.txt"
             sha256sum "$f"
           done
       - name: Upload PDF attachments
         uses: actions/upload-artifact@v4
         with:
-          name: zotero-pdf-attachments-clean-20260802
+          name: zotero-pdf-attachments-final-20260802
           path: out/*.pdf
           if-no-files-found: error
           compression-level: 0
