@@ -29,9 +29,11 @@ jobs:
             test "$(stat -c '%s' "$f")" -gt 500000 || return 1
             pdfinfo "$f" >/tmp/info.txt 2>/dev/null || return 1
             pdftotext "$f" /tmp/text.txt 2>/dev/null || return 1
-            grep -qi 'Stripe Noise Detection of High-Resolution Remote Sensing Images' /tmp/text.txt || return 1
-            grep -qi '10.3390/rs14040873' /tmp/text.txt || return 1
-            grep -qi 'Binbo Li' /tmp/text.txt || return 1
+            tr -d '[:space:]' </tmp/text.txt >/tmp/compact.txt
+            grep -qi 'StripeNoiseDetectionofHigh-ResolutionRemoteSensingImages' /tmp/compact.txt || return 1
+            grep -qi '10.3390/rs14040873' /tmp/compact.txt || return 1
+            grep -qi 'BinboLi' /tmp/compact.txt || return 1
+            grep -qi 'YingZhou' /tmp/compact.txt || return 1
             test "$(wc -c </tmp/text.txt)" -gt 50000 || return 1
             test "$(pdfinfo "$f" | awk '/^Pages:/ {print $2}')" -ge 28 || return 1
           }
