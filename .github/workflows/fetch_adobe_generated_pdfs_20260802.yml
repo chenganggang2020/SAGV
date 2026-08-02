@@ -22,10 +22,10 @@ jobs:
           set -euo pipefail
           mkdir -p out
           curl -fL --retry 4 --retry-all-errors --connect-timeout 30 --max-time 180 \
-            'https://at.adobe.com/YEGPHLEw5Y99SJ2vR4UqSfYa6KKQ' \
+            'https://at.adobe.com/CifSJmTfSQ126UeOV5KD75OTQzeK' \
             -o 'out/附件_Li2022_中英对照翻译_技术辅助译解.pdf'
           curl -fL --retry 4 --retry-all-errors --connect-timeout 30 --max-time 180 \
-            'https://at.adobe.com/Yxyvt5lFwRZs73X04PVuhfPPnuz7' \
+            'https://at.adobe.com/yRjtzeKWdgKyxyCsAxnLplFiQeay' \
             -o 'out/附件_Li2022_精读分析与ColorCast实施建议.pdf'
           for f in out/*.pdf; do
             test "$(head -c 5 "$f")" = '%PDF-'
@@ -37,7 +37,7 @@ jobs:
       - name: Upload PDF attachments
         uses: actions/upload-artifact@v4
         with:
-          name: zotero-pdf-attachments-20260802
+          name: zotero-pdf-attachments-clean-20260802
           path: out/*.pdf
           if-no-files-found: error
           compression-level: 0
